@@ -3,7 +3,7 @@ A simple BetterDiscord plugin that enables the Discord Experiments and Developer
 
 ### DO NOT USE UNLESS YOU KNOW WHAT YOU ARE DOING - YOUR ACCOUNT COULD GET BANNED
 
-![Plugin Preview]()
+![Plugin Preview](https://github.com/user-attachments/assets/5ad8ebcb-93ea-41d0-b600-29f05c4d0cdd)
 
 ### How to install
 1) Make sure you have [BetterDiscord](https://betterdiscord.app/) installed
