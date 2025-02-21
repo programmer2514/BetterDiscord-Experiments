@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description Enables the Discord Experiments and Developer settings. DO NOT USE UNLESS YOU KNOW WHAT YOU ARE DOING - YOUR ACCOUNT COULD GET BANNED
- * @version 1.0.0
+ * @version 1.0.1
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-Experiments
@@ -12,6 +12,14 @@
 
 const config = {
   changelog: [
+    {
+      title: '1.0.1',
+      type: 'added',
+      items: [
+        'Added loading animation',
+        'Fixed experiments not enabling immediately',
+      ],
+    },
     {
       title: '1.0.0',
       type: 'added',
@@ -122,8 +130,71 @@ module.exports = class Experiments {
   rerender = () => {
     // Exit and re-enter settings
     if (document.querySelector('.' + modules.layers.baseLayer).getAttribute('aria-hidden') === 'true') {
-      modules.dispatcher.dispatch({ type: 'LAYER_POP' });
-      modules.settings.open();
+      this.loading(true);
+      modules.dispatcher.dispatch({ type: 'LAYER_POP' })
+        .then(() => {
+          setTimeout(() => {
+            modules.settings.open();
+            this.loading(false);
+          }, 2000);
+        });
+    }
+  };
+
+  // Shows/hides the loading animation
+  loading = (isLoading) => {
+    if (isLoading) {
+      runtime.api.DOM.addStyle(runtime.meta.name + '_loader', `
+        .app__160d8:after {
+          content: "${runtime.api.Plugins.isEnabled(runtime.meta.name) ? 'Enabling' : 'Disabling'} Experiments...";
+          position: absolute;
+          display: block;
+          z-index: 9998;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          padding-top: 36px;
+          color: var(--text-normal);
+          background: var(--background-secondary);
+          font-family: var(--font-primary);
+          font-weight: var(--font-weight-normal);
+          font-size: x-large;
+          text-align: center;
+          line-height: 100vh;
+          transform: opacity 500ms;
+          opacity: 0;
+        }
+
+        .app__160d8:before {
+          content: "";
+          background-image: url(//github.com/programmer2514/BetterDiscord-Experiments/raw/refs/heads/main/loading.gif);
+          background-size: 128px auto;
+          background-repeat: no-repeat;
+          background-position: center;
+          position: absolute;
+          z-index: 9999;
+          top: 50%;
+          left: 50%;
+          width: 128px;
+          height: 128px;
+          transform: translate(-50%, calc(-50% - 36px));
+          transform: opacity 500ms;
+          opacity: 0;
+        }
+      `);
+      setTimeout(() => {
+        runtime.api.DOM.addStyle(runtime.meta.name + '_loader_show', `
+          .app__160d8:after,
+          .app__160d8:before {
+            opacity: 1;
+          }
+        `);
+      }, 100);
+    }
+    else {
+      setTimeout(() => runtime.api.DOM.removeStyle(runtime.meta.name + '_loader_show'), 100);
+      setTimeout(() => runtime.api.DOM.removeStyle(runtime.meta.name + '_loader'), 500);
     }
   };
 };
