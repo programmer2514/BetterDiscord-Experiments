@@ -1,5 +1,5 @@
 # Experiments for BetterDiscord
-A simple BetterDiscord plugin that enables the Discord Experiments and Developer settings.
+A BetterDiscord plugin that enables the Discord Experiments and Developer settings.
 
 #### [> Check out my other plugins <](https://github.com/programmer2514/BetterDiscord-Plugins)
 
