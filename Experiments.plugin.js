@@ -3,7 +3,7 @@
  * @author programmer2514
  * @authorId 563652755814875146
  * @description Enables the Discord Experiments and Developer settings. DO NOT USE UNLESS YOU KNOW WHAT YOU ARE DOING - YOUR ACCOUNT COULD GET BANNED
- * @version 1.0.1
+ * @version 1.1.0
  * @donate https://ko-fi.com/benjaminpryor
  * @patreon https://www.patreon.com/BenjaminPryor
  * @website https://github.com/programmer2514/BetterDiscord-Experiments
@@ -13,18 +13,11 @@
 const config = {
   changelog: [
     {
-      title: '1.0.1',
+      title: '1.1.0',
       type: 'added',
       items: [
-        'Added loading animation',
-        'Fixed experiments not enabling immediately',
-      ],
-    },
-    {
-      title: '1.0.0',
-      type: 'added',
-      items: [
-        'Initial release',
+        'Fixed loading animation',
+        'Cleaned up code',
       ],
     },
   ],
@@ -33,20 +26,20 @@ const config = {
 const runtime = {
   meta: null,
   api: null,
-  user: null,
+  get user() { return this._user ?? (this._user = modules.userStore.getCurrentUser()); },
 };
 
 const modules = {
-  userStore: null,
-  dispatcher: null,
-  settings: null,
-  layers: null,
+  get userStore() { return this._userStore ?? (this._userStore = runtime.api.Webpack.getByKeys('getUser')); },
+  get dispatcher() { return this._dispatcher ?? (this._dispatcher = runtime.api.Webpack.getByKeys('dispatch', 'isDispatching')); },
+  get settings() { return this._settings ?? (this._settings = runtime.api.Webpack.getByKeys('open', 'updateAccount')); },
+  get layers() { return this._layers ?? (this._layers = runtime.api.Webpack.getByKeys('layer', 'bg', 'baseLayer')); },
 };
 
 const actions = {
-  user: null,
-  experiment: null,
-  developer: null,
+  get user() { return this._user ?? (this._user = Object.values(modules.userStore._dispatcher._actionHandlers._dependencyGraph.nodes)); },
+  get experiment() { return this._experiment ?? (this._experiment = this.user.find(store => store.name === 'ExperimentStore').actionHandler); },
+  get developer() { return this._developer ?? (this._developer = this.user.find(store => store.name === 'DeveloperExperimentStore').actionHandler); },
 };
 
 // Export plugin class
@@ -60,8 +53,6 @@ module.exports = class Experiments {
   // Initialize the plugin when it is enabled
   start = async () => {
     this.changelog();
-    this.getComponents();
-
     this.experiments(true);
   };
 
@@ -84,23 +75,6 @@ module.exports = class Experiments {
       );
       runtime.api.Data.save('version', runtime.meta.version);
     }
-  };
-
-  // Gets the components necessary for the other functions
-  getComponents = () => {
-    // Get modules
-    modules.userStore = runtime.api.Webpack.getByKeys('getUser');
-    modules.dispatcher = runtime.api.Webpack.getByKeys('dispatch', 'isDispatching');
-    modules.settings = runtime.api.Webpack.getByKeys('open', 'updateAccount');
-    modules.layers = runtime.api.Webpack.getByKeys('layer', 'bg', 'baseLayer');
-
-    // Get action stores
-    actions.user = Object.values(modules.userStore._dispatcher._actionHandlers._dependencyGraph.nodes);
-    actions.experiment = actions.user.find(store => store.name === 'ExperimentStore').actionHandler;
-    actions.developer = actions.user.find(store => store.name === 'DeveloperExperimentStore').actionHandler;
-
-    // Get current user
-    runtime.user = modules.userStore.getCurrentUser();
   };
 
   // Turns experiments on or off
@@ -155,8 +129,8 @@ module.exports = class Experiments {
           width: 100%;
           height: 100%;
           padding-top: 36px;
-          color: var(--text-normal);
-          background: var(--background-secondary);
+          color: var(--text-default);
+          background: var(--background-base-lowest);
           font-family: var(--font-primary);
           font-weight: var(--font-weight-normal);
           font-size: x-large;
